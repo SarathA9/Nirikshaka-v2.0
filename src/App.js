@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as mobilenet from '@tensorflow-models/mobilenet';
+import axios from 'axios';
 import { 
   AppBar, Toolbar, Typography, Button, IconButton, 
-  Container, Box, Paper, CircularProgress, Snackbar, Drawer, List, ListItem, ListItemText
+  Container, Box, Paper, CircularProgress, Snackbar, Drawer, List, ListItem, ListItemText,
+  Grid, Card, CardContent, CardMedia
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -31,6 +33,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showUploadStatus, setShowUploadStatus] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [relatedContent, setRelatedContent] = useState([]);
   const fileInputRef = useRef(null);
   const modelRef = useRef(null);
 
@@ -64,6 +67,34 @@ const App = () => {
     });
   };
 
+  const fetchRelatedContent = async (predictions) => {
+    const content = await Promise.all(
+      predictions.map(async (prediction) => {
+        const term = prediction.className.split(',')[0].trim();
+        
+        // Fetch image from Unsplash
+        const unsplashResponse = await axios.get(
+          `https://api.unsplash.com/search/photos?query=${term}&per_page=1`,
+          {
+            headers: {
+              Authorization: `Client-ID ${process.env.REACT_APP_UNSPLASH_ACCESS_KEY}`
+            }
+          }
+        );
+        const imageUrl = unsplashResponse.data.results[0]?.urls.small;
+  
+        // Fetch explanation from Wikipedia
+        const wikipediaResponse = await axios.get(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${term}`
+        );
+        const explanation = wikipediaResponse.data.extract;
+  
+        return { term, imageUrl, explanation };
+      })
+    );
+    setRelatedContent(content);
+  };
+  
   const predict = async () => {
     if (!selectedFile) return;
 
@@ -72,6 +103,7 @@ const App = () => {
       const image = await loadImage(selectedFile);
       const predictions = await modelRef.current.classify(image);
       setPredictions(predictions);
+      await fetchRelatedContent(predictions);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -103,6 +135,31 @@ const App = () => {
         ))}
       </List>
     </Box>
+  );
+
+  const RelatedContentGrid = ({ content }) => (
+    <Grid container spacing={3}>
+      {content.map((item, index) => (
+        <Grid item xs={12} sm={6} md={4} key={index}>
+          <Card>
+            <CardMedia
+              component="img"
+              height="140"
+              image={item.imageUrl}
+              alt={item.term}
+            />
+            <CardContent>
+              <Typography gutterBottom variant="h5" component="div">
+                {item.term}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {item.explanation}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
   );
 
   return (
@@ -224,14 +281,19 @@ const App = () => {
           </Box>
 
           {predictions.length > 0 && (
-            <Paper elevation={3} sx={{ mt: 4, p: 3, bgcolor: 'background.paper' }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Predictions:</Typography>
-              {predictions.map((prediction, index) => (
-                <Typography key={index} sx={{ mb: 1 }}>
-                  {`${prediction.className}: ${Math.round(prediction.probability * 100)}%`}
-                </Typography>
-              ))}
-            </Paper>
+            <Box sx={{ mt: 4 }}>
+              <Paper elevation={3} sx={{ mt: 4, p: 3, bgcolor: 'background.paper' }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Predictions:</Typography>
+                {predictions.map((prediction, index) => (
+                  <Typography key={index} sx={{ mb: 1 }}>
+                    {`${prediction.className}: ${Math.round(prediction.probability * 100)}%`}
+                  </Typography>
+                ))}
+              </Paper>
+              
+              <Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 'bold' }}>Related Content:</Typography>
+              <RelatedContentGrid content={relatedContent} />
+            </Box>
           )}
         </Container>
 
@@ -240,9 +302,8 @@ const App = () => {
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between' }}>
               <Box sx={{ mb: { xs: 4, md: 0 } }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: 'primary.main' }}>About Nirikshaka</Typography>
-                <Typography variant="body2">
-                  Nirikshaka, powered by TensorFlow.js and MobileNet, is your go-to tool for object detection using machine learning. It provides accurate predictions based on analyzed data.
-                </Typography>
+                <Typography variant="body2" sx={{maxWidth:'400px',textAlign:'justify'}}>
+                Nirikshaka, powered by TensorFlow.js and MobileNet, is your go-to tool for object detection using machine learning. Nirikshaka detects objects using machine learning and provides accurate predictions based on the analyzed data.                </Typography>
               </Box>
               <Box sx={{ mb: { xs: 4, md: 0 } }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: 'primary.main' }}>Quick Links</Typography>
