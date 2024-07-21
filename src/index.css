@@ -17,26 +17,36 @@ body {
 }
 
 .upload-box {
-  border: 2px dashed #4b5563;
-  transition: all 0.3s ease;
+  border: 1px dashed transparent;
+  transition: all .5s ease;
 }
 
 .upload-box:hover {
   border-color: #4ade80;
 }
 
-@keyframes predict-animation {
-  0% {
-    transform: scale(1) rotate(0deg);
-  }
-  50% {
-    transform: scale(1.2) rotate(180deg);
-  }
-  100% {
-    transform: scale(1) rotate(360deg);
-  }
+.rajdhani-light {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 300;
+  font-style: normal;
 }
-
-.predict-animation {
-  animation: predict-animation 2s ease-in-out;
+.rajdhani-regular {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.rajdhani-medium {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+.rajdhani-semibold {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+.rajdhani-bold {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-style: normal;
 }
