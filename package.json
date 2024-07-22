@@ -2,6 +2,14 @@
   "name": "nirikshaka",
   "version": "0.1.0",
   "private": true,
+  "description": "Nirikshaka - A web application created using create-react-app",
+  "keywords": [
+    "Nirikshaka",
+    "React",
+    "web app",
+    "create-react-app"
+  ],
+  "homepage": "https://nirikshaka.vercel.app/",
   "dependencies": {
     "@emotion/react": "^11.12.0",
     "@emotion/styled": "^11.12.0",

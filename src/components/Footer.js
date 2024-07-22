@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <Box component="footer" sx={{ bgcolor: 'background.paper', color: 'text.secondary', mt: 8, py: 6 }}>
-      <Container maxWidth="lg">
+      <Container maxWidth="false">
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between' }}>
           <Box sx={{ mb: { xs: 4, md: 0 } }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: 'primary.main' }} className="rajdhani-bold">About Nirikshaka</Typography>
